@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef } from 'react'
+import { useCallback, useState, useRef, use, useEffect } from 'react'
 import './App.css'
 
 function App() {
@@ -12,7 +12,7 @@ function App() {
   //useRef hook
   const passwordRef = useRef(null)
 
-  const generatePassword = useCallback(() => {
+  const generatePassword = /*useCallback(*/() => {
     let pass = ""
     let str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
@@ -26,8 +26,17 @@ function App() {
     }
 
     setPassword(pass)
-  }, [length, numberAllowed, charAllowed , setPassword])
-  //The dependency array tells React: "Hey, only recreate this function if one of these specific variables changes."
+
+  } /*  [length, numberAllowed, charAllowed , setPassword])  
+  The dependency array tells React: "Hey, only recreate this function if one of these specific variables changes."
+
+  useEffect(() => {
+    generatePassword()
+  } , [length , numberAllowed , charAllowed]) 
+   
+  inn variables me kuch bhi chhed chhad ho to line no. 34(generatePassword()) ko dubara se run kar do
+
+  iss wale use effect ko comment out kar rhe hai kyuki is se generate passwarord function length and numberAllowed and charAllowed ke change ke sath run ho rha hai simultaneously */
 
   const passwordCopiedClass = () => {
     if (password.length > 20) {
@@ -112,3 +121,28 @@ function App() {
 }
 
 export default App
+
+
+/*
+
+The Tutor's Architecture (Auto-Generation)
+The Goal: Generate a new password the exact millisecond the user moves the length slider or clicks a checkbox.
+
+The Tool: useEffect listening to [length, numberAllowed, charAllowed].
+
+The Problem: useEffect needs to call generatePassword. But if generatePassword isn't memoized, it gets rebuilt on every render. useEffect sees a "new" function and freaks out, potentially causing infinite rendering loops.
+
+The Solution: Wrap generatePassword in useCallback so useEffect knows it's safe to use.
+
+*/
+
+/* 
+
+My Architecture (Manual Generation)
+The Goal: Wait patiently until the user explicitly clicks the "Generate Password" button.
+
+The Tool: A standard HTML <button> with an onClick event.
+
+The Result: Because you removed useEffect, React's automatic rendering lifecycle is no longer in charge of running the function. The user is. Therefore, the useCallback safety net that the tutor built became completely useless dead weight in your version.
+
+*/
